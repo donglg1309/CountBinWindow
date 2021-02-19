@@ -1,0 +1,18 @@
+normalization_tiles_for_gene_body_reads<-function(x)
+        {
+                M_0h<-import.bed(x)
+                start(ranges(M_0h))[as.character(strand(M_0h))=="-"]=start(ranges(M_0h))[as.character(strand(M_0h))=="-"]-(200-width(ranges(M_0h))[as.character(strand(M_0h))=="-"])
+                width(ranges(M_0h))[as.character(strand(M_0h))=="+"]=200
+                M_0h.p=countOverlaps(tiles_2,M_0h)
+                M_0h.p.matrix=matrix(M_0h.p,nrow=length(tiles_2)/321,ncol=321,byrow=TRUE)
+                l<-length(M_0h)
+                M_0h.p.matrix2<-M_0h.p.matrix
+                for ( i in 1:length(M_0h.p.matrix[,1]) )
+                        {
+                                for ( j in 1:length(M_0h.p.matrix[i,]))
+                                {
+                                        M_0h.p.matrix2[i,j]<-M_0h.p.matrix[i,j]
+                                }
+                        }
+                return(M_0h.p.matrix2)
+        }
