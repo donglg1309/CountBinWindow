@@ -1,0 +1,40 @@
+make_tiles_for_summit_with_orietation<-function(x,y){
+
+        gff0_genome_location<-read.table("/Users/dongliguo/Documents/reference_sequences/A_nidulans/annotation/A_nidulan_10_gene_final_annotation2.bed")
+        y1<-read.table(y)
+        asd_in_gene_name<-as.character(y1$V1)
+
+        gene_location_name<-as.character(gff0_genome_location$V4)
+        gff0_genome_location2<-as.matrix(gff0_genome_location)
+        chr_region<-matrix(0,ncol=5,nrow=length(asd_in_gene_name))
+                for ( i in 1:length(asd_in_gene_name) )
+                {
+                        chr_region[i,]<-gff0_genome_location2[asd_in_gene_name[i]==as.character(gff0_genome_location$V4),]
+                }
+
+        x1<-read.table(x)
+        x2<-x1[,1:4]
+        output_strand<-data.frame(x2,chr_region[,5])
+        write.table(output_strand,file="inter_file.bed",sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+        CreA_glucose_peaks<-import.bed("inter_file.bed")
+        gene_select_region_CreA<-CreA_glucose_peaks
+        A_value<-NULL
+        for( i in 1:length(end(ranges(gene_select_region_CreA))))
+        {
+                A_value[i]=0
+        }
+        tiles2=sapply(1:length(end(ranges(gene_select_region_CreA))),function(i)
+        if(gene_select_region_CreA$score[i]=="1")
+                A_value[i]+seq(start(ranges(gene_select_region_CreA))[i]-1500,start(ranges(gene_select_region_CreA))[i]+1500,length.out=301)
+        else
+                A_value[i]+seq(end(ranges(gene_select_region_CreA))[i]+1500,end(ranges(gene_select_region_CreA))[i]-1500,length.out=301))
+        Chromatin_length<-read.table("/Users/dongliguo/Documents/reference_sequences/A_nidulans/annotation/genome.size")
+        si<-Seqinfo(seqnames=as.character(Chromatin_length$V1),seqlengths=Chromatin_length$V2,genome="A_nidulans")
+        tiles_3 = GRanges(tilename = paste( rep(gene_select_region_CreA$name, each=301), 1:301, sep="_" ),
+                        seqnames = Rle( rep(as.character(seqnames(gene_select_region_CreA)),each=301)),
+                        ranges=IRanges(start=as.vector(tiles2),
+                        width=50),
+                        strand=Rle(rep("*",length(as.vector(tiles2)))),
+                        seqinfo=si)
+        return(tiles_3)
+}
