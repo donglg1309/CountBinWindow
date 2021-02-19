@@ -1,0 +1,14 @@
+make_tiles_for_summit<-function(x){
+        CreA_glucose_peaks<-import.bed(x)
+        tiles=sapply(1:length(end(ranges(CreA_glucose_peaks))),function(i)
+        (end(ranges(CreA_glucose_peaks))[i]+seq(-1500,1500,length.out=301))
+        )
+        Chromatin_length<-read.table("/Users/dongliguo/Documents/reference_sequences/A_nidulans/annotation/genome.size")
+        si<-Seqinfo(seqnames=as.character(Chromatin_length$V1),seqlengths=Chromatin_length$V2,genome="A_nidulans")
+        tiles_2 = GRanges(tilename = paste( rep(CreA_glucose_peaks$name, each=301), 1:301, sep="_" ),
+                        seqnames = Rle( rep(as.character(seqnames(CreA_glucose_peaks)),each=301)),
+                        ranges=IRanges(start=as.vector(tiles),
+                        width=50),
+                        strand=Rle(rep("*",length(as.vector(tiles)))),
+                        seqinfo=si)
+}
