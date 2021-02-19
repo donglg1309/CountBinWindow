@@ -1,0 +1,39 @@
+####This function is for making tiles for the TES regions###########
+
+make_tiles_for_TES<-function(x){
+
+        gff0_genome_location<-read.table("/Users/dongliguo/Documents/reference_sequences/A_nidulans/annotation/A_nidulan_10_gene_final_annotation2.bed")
+        x1<-read.table(x)
+        asd_in_gene_name<-as.character(x1$V1)
+
+        gene_location_name<-as.character(gff0_genome_location$V4)
+        gff0_genome_location2<-as.matrix(gff0_genome_location)
+        chr_region<-matrix(0,ncol=5,nrow=length(asd_in_gene_name))
+                for ( i in 1:length(asd_in_gene_name) )
+                {
+                        chr_region[i,]<-gff0_genome_location2[asd_in_gene_name[i]==as.character(gff0_genome_location$V4),]
+                }
+        write.table(chr_region,file="inter_file.bed",sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+        gene_select_region_CreA<-import.bed("inter_file.bed")
+        A_value<-NULL
+                for( i in 1:length(end(ranges(gene_select_region_CreA))))
+                {
+                        A_value[i]=0
+                }
+        tiles2=sapply(1:length(end(ranges(gene_select_region_CreA))),function(i)
+                if(gene_select_region_CreA$score[i]=="1")
+                        A_value[i]+seq(end(ranges(gene_select_region_CreA))[i]-500,end(ranges(gene_select_region_CreA))[i]+1500,length.out=321)
+                else
+                        A_value[i]+seq(end(ranges(gene_select_region_CreA))[i]+500,end(ranges(gene_select_region_CreA))[i]-1500,length.out=321))
+                        Chromatin_length<-read.table("/Users/dongliguo/Documents/reference_sequences/A_nidulans/annotation/genome.size")
+        si<-Seqinfo(seqnames=as.character(Chromatin_length$V1),seqlengths=Chromatin_length$V2,genome="A_nidulans")
+        tiles_3 = GRanges(tilename = paste( rep(gene_select_region_CreA$name, each=321), 1:321, sep="_" ),
+                        seqnames = Rle( rep(as.character(seqnames(gene_select_region_CreA)),each=321)),
+                        ranges=IRanges(start=as.vector(tiles2),
+                        width=50),
+                        strand=Rle(rep("*",length(as.vector(tiles2)))),
+                        seqinfo=si)
+        return(tiles_3)
+        }
+        
+############################        
